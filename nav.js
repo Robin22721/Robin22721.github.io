@@ -18,7 +18,7 @@ tip.appendChild(logo);
 tip.appendChild(icon);
 sidebar.appendChild(tip);
 
-let items = [["./", "Home", "home"],
+let items = [["index", "Home", "home"],
 ["about", "About me", "info-circle"],
 ["projecten", "Projecten", "edit-alt"],
 ["portfolio", "Portfolio", "file"],
@@ -34,7 +34,7 @@ items.forEach(el => {
   let navitem = document.createElement('span');
   let tooltip = document.createElement('span');
 
-  a.href = el[0];
+  a.href = el[0] + ".html";
   i.className = "bx bxs-" + el[2];
   let text = document.createTextNode(el[1]);
   navitem.appendChild(text.cloneNode());
@@ -51,8 +51,6 @@ items.forEach(el => {
 
 sidebar.append(ul);
 
-let btn = document.querySelector('#btn');
-
-btn.onclick = function () {
+icon.onclick = function () {
   sidebar.classList.toggle('active');
-};
+}

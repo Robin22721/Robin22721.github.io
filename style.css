@@ -5,6 +5,10 @@
   font-family: 'Segoe', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+body {
+  background-color: #5b5b5b;
+}
+
 #sidebar {
   position: fixed;
   top: 0;
@@ -14,6 +18,7 @@
   background-color: #12171e;
   padding: .4rem .8rem;
   transition: all .5s ease;
+  z-index: 2;
 }
 
 #sidebar.active~.main-content {
@@ -135,9 +140,8 @@
 
 .main-content {
   position: relative;
-  background-color: #5b5b5b;
   min-height: 100vh;
-  top: 0;
+  top: 50px;
   left: 80px;
   transition: all .5s ease;
   width: calc(100% - 80px);
@@ -147,4 +151,51 @@
 
 p {
   max-width: 800px;
+}
+
+.sidebyside {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+#grid {
+  margin-left: 10px;
+  border-spacing: 1px;
+  display: block;
+}
+
+#grid tr td button {
+  position: relative;
+  height: 40px;
+  width: 40px;
+  border: none;
+}
+
+#grid tr td button .text {
+  display: none;
+}
+
+#grid tr td button:hover .text {
+  display: block;
+}
+
+#grid tr td button .structure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  color: green;
+  font-weight: 700;
+}
+
+#grid tr td button * {
+  pointer-events: none;
+}
+
+
+#settings {
+  padding: 5px;
+  width: 220px;
+  background-color: #444444;
 }
