@@ -30,12 +30,16 @@ class Tile {
     this.text = gridEl.childNodes[0];
     this.structure = null;
 
-    gridEl.onclick = () => this.InteractWithGrid();
-    gridEl.addEventListener('contextmenu', event => {
-      event.preventDefault();
+    gridEl.onclick = () => {
+      this.InteractWithGrid();
+      this.ShowInfo();
+    }
+    gridEl.oncontextmenu = (e) => {
+      e.preventDefault();
       if (this.structure == null) return;
       this.DestroyStructure();
-    });
+      this.ShowInfo();
+    };
     gridEl.onmouseover = () => this.ShowInfo();
   }
 
@@ -47,6 +51,7 @@ class Tile {
   }
 
   DestroyStructure() {
+    if (this.structure == null) return;
     this.structure.active = false;
     structures.splice(structures.indexOf(this.structure), 1);
     this.structure = null;
@@ -70,13 +75,16 @@ class Tile {
 //Initialization
 const gridEl = document.getElementById('grid');
 const resetBtn = document.getElementById('reset');
+const clearLqdBtn = document.getElementById('lqdClear');
+const clearStrBtn = document.getElementById('strClear');
 const heightTxt = document.getElementById('height');
 const widthTxt = document.getElementById('width');
-const StrAmtTxt = document.getElementById('StrAmt');
-const StrDelayTxt = document.getElementById('StrDelay');
-const StrCreateBtn = document.getElementById('StrCreate');
-const LqdAmtTxt = document.getElementById('LqdAmt');
-const LqdCreateBtn = document.getElementById('LqdCreate');
+const StrAmtTxt = document.getElementById('strAmt');
+const StrDelayTxt = document.getElementById('strDelay');
+const StrCreateBtn = document.getElementById('strCreate');
+const LqdAmtTxt = document.getElementById('lqdAmt');
+const LqdCreateBtn = document.getElementById('lqdCreate');
+const HelpBtn = document.getElementById('help');
 const infoCreationTxt = document.getElementById('infoCreation');
 const infoStrAmtTxt = document.getElementById('infoStrAmt');
 const infoStrDelayTxt = document.getElementById('infoStrDelay');
@@ -95,21 +103,35 @@ let structures = [];
 
 //Settings
 const gameSpeed = 100; //in ms, default is 100
-const spreadAmount = 0.2125; //percentage each cell takes from neighbors. NO HIGHER THAN .25 unless you like strange results
+const spreadAmount = 0.2; //percentage each cell takes from neighbors. NO HIGHER THAN .25 unless you like strange results
 const minToSpread = 0.2; //minimum amount needed to be able to spread to a neighbouring tile
 const EvaporateThresh = 0.014; //minimum amount needed to not evaporate, should be higher than minToSpread
 
 //Events
 resetBtn.onclick = () => ResetGrid();
-LqdCreateBtn.onclick = (e) => {
-  console.log(e);
-  toCreate = "liquid";
-  infoCreationTxt.textContent = "Creating liquid on click";
-}
+clearLqdBtn.onclick = () => ClearLiquids();
+clearStrBtn.onclick = () => DestroyStructures();
 StrCreateBtn.onclick = () => {
   toCreate = "structure";
   infoCreationTxt.textContent = "Creating structure on click";
 }
+LqdCreateBtn.onclick = () => {
+  toCreate = "liquid";
+  infoCreationTxt.textContent = "Creating liquid on click";
+}
+HelpBtn.onclick = () =>
+  alert("Game info:\n" +
+    "Before you there is a grid, you can change its size to any length.\n" +
+    "Larger grids could result in slower operations though.\n" +
+    "Every tile here is able to hold a number and a structure.\n" +
+    "Numbers represent the amount of 'liquid' there currently is on a tile and will spread to its cardinal neighbours. (This can be negative)\n\n" +
+    "To create liquid just enter the amount you want, press 'Create Liquid', and click a tile.\n" +
+    "Structures do this for you automatically every x amount of milliseconds, just press 'Create Structure' and click a tile to create one. (These can hold negative values too. No, not the timer)\n" +
+    "You'll notice an x has appeared on that tile, it's there to indicate there's a structure located there.\n" +
+    "Want to get rid of it? Simply right click the tile and it'll poof.\n" +
+    "If you want to see how much liquid is on a tile, hover over it and it'll tell you.\n" +
+    `Liquid is also able to evaporate, if its absolute value is below ${EvaporateThresh}.\n\n` +
+    "That's about everything, 'reset' and 'clear liquids' should be self explanatory.");
 
 //Single line functions
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -128,7 +150,6 @@ async function RunGame() {
     Evaporate();
     DisplayNumbers();
     UpdateColors();
-    // UpdateInfo();
     //console.log(matrix.reduce((total, rowV) => total + rowV.reduce((sum, cell) => sum + cell.amt, 0), 0));
   }
 }
@@ -152,8 +173,8 @@ function CreateGrid() {
 function ResetGrid() {
   h = heightTxt.value;
   w = widthTxt.value;
-  CreateGrid();
   DestroyStructures();
+  CreateGrid();
   //create structures on reset here
   // CreateStructure(0, 0, 50, 1000);
   // CreateStructure(6, 7, 20, 50);
@@ -163,6 +184,12 @@ function ResetGrid() {
   // matrix[0][0].amt = 4000;
   // matrix[h - 1][w - 1].amt = -200;
   DisplayNumbers();
+}
+
+function ClearLiquids() {
+  matrix.forEach(row =>
+    row.forEach(cell =>
+      cell.amt = 0));
 }
 
 function CreateStructure(x, y, emitamt, delay) {
@@ -183,8 +210,7 @@ function CreateStructure(x, y, emitamt, delay) {
 }
 
 function DestroyStructures() {
-  structures.forEach(x => x.active = false);
-  structures = [];
+  matrix.forEach(x => x.forEach(y => y.DestroyStructure()));
 }
 
 function DisplayNumbers() {
@@ -199,10 +225,6 @@ function UpdateColors() {
       const c = 255 - Math.min(255, cell.amt * Math.sign(cell.amt)) * 5
       cell.gridElement.style.background = cell.amt > 0 ? `rgb(255, ${c}, ${c})` : `rgb(${c}, ${c}, 255)`;
     }))
-}
-//TODO
-function UpdateInfo() {
-
 }
 
 function SetOriginalValues() {

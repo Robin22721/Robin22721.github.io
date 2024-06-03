@@ -34,7 +34,7 @@ items.forEach(el => {
   let navitem = document.createElement('span');
   let tooltip = document.createElement('span');
 
-  a.href = el[0] + ".html";
+  a.href = el[0] /* + ".html" */;
   i.className = "bx bxs-" + el[2];
   let text = document.createTextNode(el[1]);
   navitem.appendChild(text.cloneNode());
